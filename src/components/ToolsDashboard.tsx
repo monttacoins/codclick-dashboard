@@ -19,7 +19,7 @@ import { useNavigate } from "react-router-dom";
 import {
   DndContext,
   closestCenter,
-  PointerSensor,
+  MouseSensor,
   TouchSensor,
   KeyboardSensor,
   useSensor,
@@ -106,8 +106,8 @@ export function ToolsDashboard() {
   }, []);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 2000, tolerance: 8 } }),
+    useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 2000, tolerance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
@@ -223,7 +223,7 @@ function SortableTile({ tool }: { tool: Ferramenta }) {
       style={style}
       {...attributes}
       {...listeners}
-      className="group flex cursor-grab touch-none flex-col items-center gap-3 rounded-2xl border border-border bg-card p-4 text-center transition-all hover:-translate-y-1 hover:border-primary/50 hover:shadow-[var(--shadow-tile)] active:cursor-grabbing"
+      className="group flex cursor-grab touch-pan-y flex-col items-center gap-3 rounded-2xl border border-border bg-card p-4 text-center transition-all hover:-translate-y-1 hover:border-primary/50 hover:shadow-[var(--shadow-tile)] active:cursor-grabbing"
       onClick={(e) => {
         if (isDragging) return;
         if (tool.link) window.open(tool.link, "_blank", "noopener,noreferrer");
