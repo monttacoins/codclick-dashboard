@@ -107,7 +107,7 @@ export function ToolsDashboard() {
 
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 2000, tolerance: 4 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 2000, tolerance: 16 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
@@ -212,9 +212,31 @@ export function ToolsDashboard() {
 }
 
 function SortableTile({ tool }: { tool: Ferramenta }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: tool.id,
-  });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: tool.id });
+  const dragClickRef = useRef(false);
+
+  useEffect(() => {
+    if (isDragging) {
+      dragClickRef.current = true;
+      return;
+    }
+
+    if (!dragClickRef.current) return;
+    const timeout = window.setTimeout(() => {
+      dragClickRef.current = false;
+    }, 350);
+
+    return () => window.clearTimeout(timeout);
+  }, [isDragging]);
+
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -225,16 +247,22 @@ function SortableTile({ tool }: { tool: Ferramenta }) {
     <div
       ref={setNodeRef}
       style={style}
-      {...attributes}
-      {...listeners}
-      className="group flex cursor-grab touch-pan-y flex-col items-center gap-3 rounded-2xl border border-border bg-card p-4 text-center transition-all hover:-translate-y-1 hover:border-primary/50 hover:shadow-[var(--shadow-tile)] active:cursor-grabbing"
+      className="group flex touch-pan-y flex-col items-center gap-3 rounded-2xl border border-border bg-card p-4 text-center transition-all hover:-translate-y-1 hover:border-primary/50 hover:shadow-[var(--shadow-tile)]"
       onClick={(e) => {
-        if (isDragging) return;
+        if (isDragging || dragClickRef.current) {
+          e.preventDefault();
+          return;
+        }
         if (tool.link) window.open(tool.link, "_blank", "noopener,noreferrer");
         e.preventDefault();
       }}
     >
-      <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-muted ring-1 ring-border transition-all group-hover:ring-primary/50 sm:h-20 sm:w-20">
+      <div
+        ref={setActivatorNodeRef}
+        {...attributes}
+        {...listeners}
+        className="flex h-16 w-16 cursor-grab touch-pan-y items-center justify-center overflow-hidden rounded-2xl bg-muted ring-1 ring-border transition-all group-hover:ring-primary/50 active:cursor-grabbing sm:h-20 sm:w-20"
+      >
         {tool.icone_url ? (
           <img
             src={tool.icone_url}
