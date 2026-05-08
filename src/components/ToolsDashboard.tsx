@@ -261,7 +261,7 @@ function SortableTile({ tool }: { tool: Ferramenta }) {
         ref={setActivatorNodeRef}
         {...attributes}
         {...listeners}
-        className="flex h-16 w-16 cursor-grab touch-none items-center justify-center overflow-hidden rounded-2xl bg-muted ring-1 ring-border transition-all group-hover:ring-primary/50 active:cursor-grabbing sm:h-20 sm:w-20"
+        className="flex h-16 w-16 cursor-grab touch-pan-y items-center justify-center overflow-hidden rounded-2xl bg-muted ring-1 ring-border transition-all group-hover:ring-primary/50 active:cursor-grabbing sm:h-20 sm:w-20"
       >
         {tool.icone_url ? (
           <img
