@@ -19,7 +19,7 @@ import { useNavigate } from "react-router-dom";
 import {
   DndContext,
   closestCenter,
-  PointerSensor,
+  MouseSensor,
   TouchSensor,
   KeyboardSensor,
   useSensor,
@@ -106,8 +106,8 @@ export function ToolsDashboard() {
   }, []);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 2000, tolerance: 8 } }),
+    useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 2000, tolerance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
@@ -146,35 +146,35 @@ export function ToolsDashboard() {
             <h1 className="text-base font-semibold tracking-tight sm:text-lg">{companyName}</h1>
           </div>
           <div className="flex items-center gap-1">
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Configurações"
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <Settings className="h-5 w-5" />
-              </Button>
-            </DialogTrigger>
-            <SettingsDialog
-              tools={tools}
-              companyName={companyName}
-              logo={logo}
-              configId={configId}
-              onChanged={loadAll}
-              onClose={() => setOpen(false)}
-            />
-          </Dialog>
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Sair"
-            onClick={logout}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <LogOut className="h-5 w-5" />
-          </Button>
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Configurações"
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <Settings className="h-5 w-5" />
+                </Button>
+              </DialogTrigger>
+              <SettingsDialog
+                tools={tools}
+                companyName={companyName}
+                logo={logo}
+                configId={configId}
+                onChanged={loadAll}
+                onClose={() => setOpen(false)}
+              />
+            </Dialog>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Sair"
+              onClick={logout}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <LogOut className="h-5 w-5" />
+            </Button>
           </div>
         </div>
       </header>
@@ -192,7 +192,11 @@ export function ToolsDashboard() {
             </p>
           </div>
         ) : (
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
             <SortableContext items={tools.map((t) => t.id)} strategy={rectSortingStrategy}>
               <div className="grid grid-cols-3 gap-4 sm:gap-6 md:grid-cols-5">
                 {tools.map((tool) => (
@@ -223,7 +227,7 @@ function SortableTile({ tool }: { tool: Ferramenta }) {
       style={style}
       {...attributes}
       {...listeners}
-      className="group flex cursor-grab touch-none flex-col items-center gap-3 rounded-2xl border border-border bg-card p-4 text-center transition-all hover:-translate-y-1 hover:border-primary/50 hover:shadow-[var(--shadow-tile)] active:cursor-grabbing"
+      className="group flex cursor-grab touch-pan-y flex-col items-center gap-3 rounded-2xl border border-border bg-card p-4 text-center transition-all hover:-translate-y-1 hover:border-primary/50 hover:shadow-[var(--shadow-tile)] active:cursor-grabbing"
       onClick={(e) => {
         if (isDragging) return;
         if (tool.link) window.open(tool.link, "_blank", "noopener,noreferrer");
@@ -232,12 +236,19 @@ function SortableTile({ tool }: { tool: Ferramenta }) {
     >
       <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-muted ring-1 ring-border transition-all group-hover:ring-primary/50 sm:h-20 sm:w-20">
         {tool.icone_url ? (
-          <img src={tool.icone_url} alt={tool.nome} className="h-full w-full object-cover" draggable={false} />
+          <img
+            src={tool.icone_url}
+            alt={tool.nome}
+            className="h-full w-full object-cover"
+            draggable={false}
+          />
         ) : (
           <Wrench className="h-7 w-7 text-muted-foreground" />
         )}
       </div>
-      <span className="line-clamp-2 text-xs font-medium text-foreground sm:text-sm">{tool.nome}</span>
+      <span className="line-clamp-2 text-xs font-medium text-foreground sm:text-sm">
+        {tool.nome}
+      </span>
     </div>
   );
 }
@@ -366,7 +377,11 @@ function SettingsDialog({
               </div>
             </div>
             <Button onClick={saveCompany} disabled={savingCompany} size="sm">
-              {savingCompany ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+              {savingCompany ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="mr-2 h-4 w-4" />
+              )}
               Salvar empresa
             </Button>
           </section>
@@ -391,7 +406,9 @@ function SettingsDialog({
       </ScrollArea>
 
       <DialogFooter>
-        <Button variant="ghost" onClick={onClose}>Fechar</Button>
+        <Button variant="ghost" onClick={onClose}>
+          Fechar
+        </Button>
       </DialogFooter>
     </DialogContent>
   );
@@ -487,7 +504,11 @@ function ToolRow({ tool, onChanged }: { tool: Ferramenta; onChanged: () => Promi
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
         </Button>
         <Button size="sm" variant="ghost" onClick={remove} disabled={removing} aria-label="Remover">
-          {removing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4 text-destructive" />}
+          {removing ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Trash2 className="h-4 w-4 text-destructive" />
+          )}
         </Button>
       </div>
     </div>
